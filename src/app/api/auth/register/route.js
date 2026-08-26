@@ -1,24 +1,21 @@
 /**
- * @file HTTP route handlers for `/api/auth/register`.
- *
- * Thin HTTP boundary: every handler resolves its controller from the DI container and
- * delegates. No business rules live here (NFR-12); validation, authorization, and
- * persistence belong to the middleware, service, and repository layers.
- *
+ * @fileoverview POST /api/auth/register — thin HTTP entry point that
+ * delegates to the controller. No business logic here.
  * @module app/api/auth/register/route
  */
-
-import { NotImplementedError } from '@/server/core/not-implemented-error';
+import { NextResponse } from 'next/server';
+import { registerUserController } from '@/controllers/auth.controller';
 
 /**
- * HJU-A01 register a new account (pending until verified) — delegates to AuthController.register.
- *
- * @param {Request} _request - Incoming HTTP request.
- * @param {{ params: Promise<Record<string, never>> }} _context - Route context; this route has no
- *   dynamic segments.
- * @returns {Promise<Response>} Created/accepted response body.
- * @throws {NotImplementedError} Always, until `POST /api/auth/register` is implemented.
+ * @param {Request} request
+ * @returns {Promise<NextResponse>}
  */
-export async function POST(_request, _context) {
-  throw new NotImplementedError('POST /api/auth/register');
+export async function POST(request) {
+  const form = await request.json();
+  const result = await registerUserController(form);
+
+  if (!result.success) {
+    return NextResponse.json({ errors: result.errors }, { status: result.status });
+  }
+  return NextResponse.json({ data: result.data }, { status: result.status });
 }
