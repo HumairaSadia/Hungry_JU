@@ -9,9 +9,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 const menuItems = [
-  { name: 'Campus breakfast', place: 'TSC Cafe', price: '৳85', category: 'Popular', image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=900&q=85', tone: 'sun' },
-  { name: 'Chicken katsu bowl', place: 'JU Kitchen', price: '৳180', category: 'Meals', image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85', tone: 'leaf' },
-  { name: 'Iced matcha cloud', place: 'Green Room', price: '৳120', category: 'Drinks', image: 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=900&q=85', tone: 'mint' },
+  { name: 'Campus breakfast', place: 'TSC Cafe', price: '৳85', priceValue: 85, category: 'Popular', image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=900&q=85', tone: 'sun' },
+  { name: 'Chicken katsu bowl', place: 'JU Kitchen', price: '৳180', priceValue: 180, category: 'Meals', image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85', tone: 'leaf' },
+  { name: 'Iced matcha cloud', place: 'Green Room', price: '৳120', priceValue: 120, category: 'Drinks', image: 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=900&q=85', tone: 'mint' },
 ];
 
 const categories = ['All', 'Popular', 'Meals', 'Drinks'];
@@ -25,12 +25,23 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [query, setQuery] = useState('');
   const [bagCount, setBagCount] = useState(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(250);
+  const [sortBy, setSortBy] = useState('featured');
 
-  const visibleItems = menuItems.filter((item) => {
-    const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
-    const matchesQuery = `${item.name} ${item.place}`.toLowerCase().includes(query.toLowerCase());
-    return matchesCategory && matchesQuery;
-  });
+  const visibleItems = menuItems
+    .filter((item) => {
+      const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
+      const matchesQuery = `${item.name} ${item.place}`.toLowerCase().includes(query.toLowerCase());
+      return matchesCategory && matchesQuery && item.priceValue <= maxPrice;
+    })
+    .sort((firstItem, secondItem) => {
+      if (sortBy === 'price-low') return firstItem.priceValue - secondItem.priceValue;
+      if (sortBy === 'price-high') return secondItem.priceValue - firstItem.priceValue;
+      return 0;
+    });
+
+  const activeFilterCount = (maxPrice < 250 ? 1 : 0) + (sortBy !== 'featured' ? 1 : 0);
 
   return (
     <main className="home-shell">
@@ -79,7 +90,8 @@ export default function HomePage() {
 
       <section className="menu-section" id="menu">
         <div className="section-heading"><div><p className="eyebrow">The campus edit</p><h2>What&apos;s cooking <span>today.</span></h2></div><div className="search-wrap"><span aria-hidden="true">⌕</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search your craving..." aria-label="Search menu" /></div></div>
-        <div className="menu-toolbar"><div className="category-tabs" role="tablist" aria-label="Menu categories">{categories.map((category) => <button className={activeCategory === category ? 'active' : ''} key={category} type="button" onClick={() => setActiveCategory(category)}>{category}</button>)}</div><Link className="view-all" href="/shops">View all spots <span aria-hidden="true">→</span></Link></div>
+        <div className="menu-toolbar"><div className="category-tabs" role="tablist" aria-label="Menu categories">{categories.map((category) => <button className={activeCategory === category ? 'active' : ''} key={category} type="button" onClick={() => setActiveCategory(category)}>{category}</button>)}</div><div className="toolbar-actions"><button className={`filter-button ${filtersOpen ? 'active' : ''}`} type="button" aria-expanded={filtersOpen} aria-controls="food-filters" onClick={() => setFiltersOpen((isOpen) => !isOpen)}>Filter {activeFilterCount > 0 && <span>{activeFilterCount}</span>} <strong aria-hidden="true">⌄</strong></button><Link className="view-all" href="/shops">View all spots <span aria-hidden="true">→</span></Link></div></div>
+        {filtersOpen && <div className="food-filters" id="food-filters"><label htmlFor="max-price">Up to <strong>৳{maxPrice}</strong><input id="max-price" type="range" min="85" max="250" step="5" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} /></label><label htmlFor="sort-food">Sort by<select id="sort-food" value={sortBy} onChange={(event) => setSortBy(event.target.value)}><option value="featured">Featured</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></label><button className="clear-filters" type="button" onClick={() => { setMaxPrice(250); setSortBy('featured'); }}>Clear filters</button></div>}
         <div className="menu-grid">{visibleItems.map((item) => <article className={`menu-card ${item.tone}`} key={item.name}><div className="menu-image-wrap"><img src={item.image} alt={item.name} /><span>{item.category}</span></div><div className="menu-card-copy"><div><h3>{item.name}</h3><p>{item.place}</p></div><div className="menu-card-bottom"><strong>{item.price}</strong><button type="button" onClick={() => setBagCount((count) => count + 1)} aria-label={`Add ${item.name} to bag`}>Add <span aria-hidden="true">+</span></button></div></div></article>)}</div>
         {visibleItems.length === 0 && <p className="empty-state">No bites match that search yet. Try “bowl” or “drink”.</p>}
       </section>
