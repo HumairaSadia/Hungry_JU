@@ -46,4 +46,5 @@ next-env.d.ts
 # the template is safe to commit; real values live in .env.local
 !.env.example
 .env
-.env.localdocs/
+.env.local
+docs/
