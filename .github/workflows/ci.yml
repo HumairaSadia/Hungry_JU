@@ -5,6 +5,7 @@ on:
     branches: [main]
   push:
     branches: [main]
+  
 
 # A new push to the same branch cancels the previous in-flight run.
 concurrency:
