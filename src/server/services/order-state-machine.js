@@ -97,9 +97,12 @@ export class OrderStateMachine extends BaseStateMachine {
    * @returns {boolean} `true` while the order may still be cancelled.
    * @throws {NotImplementedError} Until implemented.
    */
-  isCancellable(_state) {
-    throw new NotImplementedError('OrderStateMachine.isCancellable');
-  }
+  // isCancellable(_state) {
+  //   throw new NotImplementedError('OrderStateMachine.isCancellable');
+  // }
+  static isCancellable(status) {
+  return status === ORDER_STATUS.PLACED || status === ORDER_STATUS.ACCEPTED;
+}
 
   /**
    * Which role may drive this transition (student, vendor, delivery partner, scheduler).

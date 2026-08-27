@@ -214,9 +214,13 @@ export class Order extends BaseModel {
    * @returns {boolean} `true` while the cancel window is open.
    * @throws {NotImplementedError} Until implemented.
    */
+  // get isCancellable() {
+  //   throw new NotImplementedError('Order.isCancellable');
+  // }
   get isCancellable() {
-    throw new NotImplementedError('Order.isCancellable');
-  }
+  return OrderStateMachine.isCancellable(this.status);
+}
+
 
   /**
    * Available to riders once the vendor accepted it (drives the Available Orders feed).
@@ -246,9 +250,15 @@ export class Order extends BaseModel {
    * @returns {void}
    * @throws {NotImplementedError} Until implemented.
    */
-  applyTransition(_toStatus, _actor) {
-    throw new NotImplementedError('Order.applyTransition');
-  }
+  // applyTransition(_toStatus, _actor) {
+  //   throw new NotImplementedError('Order.applyTransition');
+  // }
+
+  applyTransition(nextStatus) {
+  OrderStateMachine.assertCan(this.status, nextStatus);
+  this.status = nextStatus;
+  return this;
+}
 
   /**
    * Recomputes totals from line snapshots; used at construction, not after placement.
@@ -268,9 +278,12 @@ export class Order extends BaseModel {
    * @returns {boolean} `true` when the order belongs to that student.
    * @throws {NotImplementedError} Until implemented.
    */
-  belongsTo(_studentId) {
-    throw new NotImplementedError('Order.belongsTo');
-  }
+  // belongsTo(_studentId) {
+  //   throw new NotImplementedError('Order.belongsTo');
+  // }
+  belongsTo(userId) {
+  return this.userId === userId;
+}
 
   /**
    * Built from a validated Cart at checkout (UC-01 step 7).
