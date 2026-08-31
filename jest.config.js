@@ -1,3 +1,4 @@
+
 /** @type {import('jest').Config} */
 const config = {
   // Automatically clear mock calls before every test
