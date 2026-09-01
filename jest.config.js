@@ -1,38 +1,23 @@
+const nextJest = require('next/jest');
+
+const createJestConfig = nextJest({
+  // Path to your Next.js app to load next.config.js and .env files
+  dir: './',
+});
 
 /** @type {import('jest').Config} */
-const config = {
-  // Automatically clear mock calls before every test
+const customConfig = {
   clearMocks: true,
-
-  // Indicates whether the coverage information should be collected while executing the test
   collectCoverage: true,
-
-  // The directory where Jest should output its coverage files
   coverageDirectory: 'coverage',
-
-  // Indicates which provider should be used to instrument code for coverage
   coverageProvider: 'v8',
-
-  /* ========================================================
-     👇 ADD THIS PROJECTS ARRAY TO SPLIT THE ENVIRONMENTS 👇
-     ======================================================== */
-  projects: [
-    {
-      displayName: 'backend',
-      testEnvironment: 'node',
-      testMatch: ['<rootDir>/backend/**/*.test.js'],
-    },
-    {
-      displayName: 'frontend',
-      testEnvironment: 'jsdom',
-      testMatch: ['<rootDir>/frontend/**/*.test.js'],
-    },
-  ],
-
-  // Comment out or remove the root level testEnvironment and testMatch lines
-  // so they do not conflict with your project sub-settings below:
-  // testEnvironment: "jest-environment-node",
-  // testMatch: [ ... ],
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  testMatch: ['<rootDir>/__tests__/**/*.test.js', '<rootDir>/__tests__/**/*.test.jsx'],
 };
 
-module.exports = config;
+// createJestConfig is exported this way to ensure next/jest can load the Next.js config, which is async
+module.exports = createJestConfig(customConfig);

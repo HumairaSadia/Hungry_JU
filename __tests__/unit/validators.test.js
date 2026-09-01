@@ -1,4 +1,10 @@
-import { isValidEmail, isValidPhone, isStrongPassword, passwordsMatch, validateRegistrationForm } from '@/utils/validators';
+import {
+  isValidEmail,
+  isValidPhone,
+  isStrongPassword,
+  passwordsMatch,
+  validateRegistrationForm,
+} from '@/utils/validators';
 
 describe('isValidEmail (AC-02)', () => {
   test('accepts a valid email', () => expect(isValidEmail('user@gmail.com')).toBe(true));
@@ -9,7 +15,8 @@ describe('isValidEmail (AC-02)', () => {
 describe('isValidPhone (AC-03)', () => {
   test('accepts a valid BD phone number', () => expect(isValidPhone('01712345678')).toBe(true));
   test('rejects a too-short number', () => expect(isValidPhone('12345')).toBe(false));
-  test('rejects a number containing letters', () => expect(isValidPhone('01712abc678')).toBe(false));
+  test('rejects a number containing letters', () =>
+    expect(isValidPhone('01712abc678')).toBe(false));
 });
 
 describe('isStrongPassword (AC-05)', () => {
@@ -24,9 +31,14 @@ describe('passwordsMatch (AC-06)', () => {
 
 describe('validateRegistrationForm (AC-01)', () => {
   const validForm = {
-    fullName: 'Jane Doe', email: 'jane@example.com', phoneNumber: '',
-    photoURL: 'https://example.com/photo.jpg', gender: 'female',
-    password: 'Password@123', confirmPassword: 'Password@123', acceptedTerms: true,
+    fullName: 'Jane Doe',
+    email: 'jane@example.com',
+    phoneNumber: '',
+    photoURL: 'https://example.com/photo.jpg',
+    gender: 'female',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    acceptedTerms: true,
   };
   test('no errors for a valid form', () => expect(validateRegistrationForm(validForm)).toEqual({}));
   test('requires at least one contact method', () => {

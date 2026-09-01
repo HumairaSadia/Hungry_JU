@@ -29,7 +29,16 @@ export class User {
    * @param {string} [data.role='customer']
    * @param {string} [data.status=ACCOUNT_STATUS.PENDING]
    */
-  constructor({ uid, fullName, email = null, phoneNumber = null, photoURL, gender, role = 'customer', status = ACCOUNT_STATUS.PENDING }) {
+  constructor({
+    uid,
+    fullName,
+    email = null,
+    phoneNumber = null,
+    photoURL,
+    gender,
+    role = 'customer',
+    status = ACCOUNT_STATUS.PENDING,
+  }) {
     this.uid = uid;
     this.fullName = fullName;
     this.email = email;

@@ -4,7 +4,11 @@
  * @module controllers/auth.controller
  */
 import { validateRegistrationForm } from '@/utils/validators';
-import { isDuplicateAccount, createUserAccount, generateEmailVerificationLink } from '@/services/auth.service';
+import {
+  isDuplicateAccount,
+  createUserAccount,
+  generateEmailVerificationLink,
+} from '@/services/auth.service';
 
 /**
  * Handles the full registration use case (US-001 main flow).
@@ -22,7 +26,11 @@ export async function registerUserController(form) {
     // AC-04
     const duplicate = await isDuplicateAccount(form.email, form.phoneNumber);
     if (duplicate) {
-      return { success: false, status: 409, errors: { contact: 'An account with this email or phone number already exists.' } };
+      return {
+        success: false,
+        status: 409,
+        errors: { contact: 'An account with this email or phone number already exists.' },
+      };
     }
 
     // Password hashing handled internally by Firebase Auth
@@ -37,6 +45,10 @@ export async function registerUserController(form) {
   } catch (error) {
     // AC-15: never leak internals to the client
     console.error('[auth.controller] registration failed:', error);
-    return { success: false, status: 500, errors: { general: 'Something went wrong while creating your account. Please try again.' } };
+    return {
+      success: false,
+      status: 500,
+      errors: { general: 'Something went wrong while creating your account. Please try again.' },
+    };
   }
 }

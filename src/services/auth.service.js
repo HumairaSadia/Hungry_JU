@@ -16,11 +16,19 @@ const USERS_COLLECTION = 'users';
  */
 export async function isDuplicateAccount(email, phoneNumber) {
   if (email) {
-    const byEmail = await adminDB.collection(USERS_COLLECTION).where('email', '==', email).limit(1).get();
+    const byEmail = await adminDB
+      .collection(USERS_COLLECTION)
+      .where('email', '==', email)
+      .limit(1)
+      .get();
     if (!byEmail.empty) return true;
   }
   if (phoneNumber) {
-    const byPhone = await adminDB.collection(USERS_COLLECTION).where('phoneNumber', '==', phoneNumber).limit(1).get();
+    const byPhone = await adminDB
+      .collection(USERS_COLLECTION)
+      .where('phoneNumber', '==', phoneNumber)
+      .limit(1)
+      .get();
     if (!byPhone.empty) return true;
   }
   return false;

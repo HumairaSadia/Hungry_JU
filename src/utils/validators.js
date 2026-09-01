@@ -64,11 +64,14 @@ export function validateRegistrationForm(form) {
 
   if (!hasEmail && !hasPhone) errors.contact = 'Provide at least one of Email or Phone Number.';
   if (hasEmail && !isValidEmail(form.email)) errors.email = 'Please enter a valid email address.';
-  if (hasPhone && !isValidPhone(form.phoneNumber)) errors.phoneNumber = 'Please enter a valid Bangladeshi phone number.';
+  if (hasPhone && !isValidPhone(form.phoneNumber))
+    errors.phoneNumber = 'Please enter a valid Bangladeshi phone number.';
   if (!isStrongPassword(form.password)) {
-    errors.password = 'Password must be 8+ characters with uppercase, lowercase, number and special character.';
+    errors.password =
+      'Password must be 8+ characters with uppercase, lowercase, number and special character.';
   }
-  if (!passwordsMatch(form.password, form.confirmPassword)) errors.confirmPassword = 'Passwords do not match.';
+  if (!passwordsMatch(form.password, form.confirmPassword))
+    errors.confirmPassword = 'Passwords do not match.';
 
   return errors;
 }

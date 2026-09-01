@@ -9,9 +9,14 @@ jest.mock('@/services/auth.service', () => ({
 }));
 
 const validForm = {
-  fullName: 'Jane Doe', email: 'jane@example.com', phoneNumber: '',
-  photoURL: 'https://example.com/photo.jpg', gender: 'female',
-  password: 'Password@123', confirmPassword: 'Password@123', acceptedTerms: true,
+  fullName: 'Jane Doe',
+  email: 'jane@example.com',
+  phoneNumber: '',
+  photoURL: 'https://example.com/photo.jpg',
+  gender: 'female',
+  password: 'Password@123',
+  confirmPassword: 'Password@123',
+  acceptedTerms: true,
 };
 
 describe('registerUserController', () => {
@@ -30,7 +35,10 @@ describe('registerUserController', () => {
 
   test('returns 201 on success (AC-16)', async () => {
     authService.isDuplicateAccount.mockResolvedValue(false);
-    authService.createUserAccount.mockResolvedValue({ uid: 'abc123', status: 'pending_verification' });
+    authService.createUserAccount.mockResolvedValue({
+      uid: 'abc123',
+      status: 'pending_verification',
+    });
     authService.generateEmailVerificationLink.mockResolvedValue('https://verify.link');
     const result = await registerUserController(validForm);
     expect(result.status).toBe(201);
