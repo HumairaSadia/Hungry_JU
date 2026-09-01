@@ -85,3 +85,6 @@ jobs:
           # so it must never hold a secret. Runtime values (DATABASE_URL, JWT
           # secrets) are injected by the deploy step, not here.
           NEXT_PUBLIC_APP_URL: http://localhost:3000
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
