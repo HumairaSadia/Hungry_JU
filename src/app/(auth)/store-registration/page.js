@@ -11,7 +11,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ApiClient } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 
 /**
  * Form state aggregate for store registration input fields.

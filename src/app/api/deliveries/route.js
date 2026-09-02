@@ -8,19 +8,19 @@
  * @module app/api/deliveries/route
  */
 
-import { NotImplementedError } from '@/server/core/not-implemented-error';
+import { Container, TOKENS } from '@/server/config/container';
 
 /**
- * UC-02 first-accept-wins claim (409 on loss) — delegates to DeliveryController.acceptOrder.
+ * UC-02 first-accept-wins claim (409 on loss) – delegates to DeliveryController.acceptOrder.
  * Creating the delivery IS the claim, so the order id travels in the body: at this point no
  * delivery id exists yet, and Next.js allows only one slug name per path position.
  *
- * @param {Request} _request - Incoming HTTP request.
- * @param {{ params: Promise<Record<string, never>> }} _context - Route context; this route has no
+ * @param {Request} request - Incoming HTTP request.
+ * @param {{ params: Promise<Record<string, never>> }} context - Route context; this route has no
  *   dynamic segments.
  * @returns {Promise<Response>} Created/accepted response body.
- * @throws {NotImplementedError} Always, until `POST /api/deliveries` is implemented.
  */
-export async function POST(_request, _context) {
-  throw new NotImplementedError('POST /api/deliveries');
+export async function POST(request, context) {
+  const controller = Container.instance.resolve(TOKENS.DELIVERY_CONTROLLER ?? Symbol.for('deliveryController'));
+  return controller.acceptOrder(request, context.params);
 }

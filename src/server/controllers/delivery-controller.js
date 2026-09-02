@@ -38,24 +38,56 @@ export class DeliveryController extends BaseController {
   /**
    * Lists claimable orders for the rider feed (FR-D2).
    *
-   * @param {Request} _request - Incoming request.
+   * @param {Request} request - Incoming request.
    * @returns {Promise<Response>} JSON response for the route handler to return.
-   * @throws {NotImplementedError} Until `DeliveryController.listAvailable` is implemented.
    */
-  async listAvailable(_request) {
-    throw new NotImplementedError('DeliveryController.listAvailable');
+  async listAvailable(request) {
+    try {
+      const actor = this.actor(request);
+      const orders = await this.#assignmentService.listAvailableOrders(actor);
+      return this.ok(orders);
+    } catch (error) {
+      if (typeof this.handleError === 'function') {
+        return this.handleError(error);
+      }
+      if (error.statusCode) {
+        return Response.json(
+          error.toJSON ? error.toJSON() : { message: error.message, code: error.code },
+          { status: error.statusCode }
+        );
+      }
+      throw error;
+    }
   }
 
   /**
    * Returns 409 when another rider won the race — the client refreshes the feed.
    *
-   * @param {Request} _request - Incoming request.
-   * @param {Record<string, string>} _params - Resolved dynamic route segments.
+   * @param {Request} request - Incoming request.
+   * @param {Record<string, string>} [params] - Resolved dynamic route segments.
    * @returns {Promise<Response>} JSON response for the route handler to return.
-   * @throws {NotImplementedError} Until `DeliveryController.acceptOrder` is implemented.
    */
-  async acceptOrder(_request, _params) {
-    throw new NotImplementedError('DeliveryController.acceptOrder');
+  async acceptOrder(request, params) {
+    try {
+      const actor = this.actor(request);
+      const body = await request.json().catch(() => ({}));
+      const resolvedParams = params ? await params : {};
+      const orderId = body.orderId || resolvedParams.orderId || resolvedParams.id;
+
+      const delivery = await this.#assignmentService.acceptOrder(actor, orderId);
+      return this.created(delivery);
+    } catch (error) {
+      if (typeof this.handleError === 'function') {
+        return this.handleError(error);
+      }
+      if (error.statusCode) {
+        return Response.json(
+          error.toJSON ? error.toJSON() : { message: error.message, code: error.code },
+          { status: error.statusCode }
+        );
+      }
+      throw error;
+    }
   }
 
   /**
