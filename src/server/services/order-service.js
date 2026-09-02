@@ -6,6 +6,7 @@
 
 import { BaseService } from '@/server/core/base-service';
 import { NotImplementedError } from '@/server/core/not-implemented-error';
+import { ConflictError, ForbiddenError, NotFoundError } from '@/server/core/errors';
 
 /**
  * What the tracking poll returns to the student's status stepper.
@@ -193,17 +194,56 @@ export class OrderService extends BaseService {
     throw new NotImplementedError('OrderService.markReadyForPickup');
   }
 
-  /**
+    /**
    * UC-03. Eligibility is re-checked at commit time, not when the button rendered.
    *
-   * @param {import('@/shared/types').Actor} _actor - Cancelling student.
-   * @param {string} _orderId - Order to cancel.
-   * @param {string} [_reason] - Optional reason recorded on the audit row.
+   * @param {import('@/shared/types').Actor} actor - Cancelling student.
+   * @param {string} orderId - Order to cancel.
+   * @param {string} [reason] - Optional reason recorded on the audit row.
    * @returns {Promise<import('@/server/models/order').Order>} The cancelled order.
-   * @throws {NotImplementedError} Until implemented.
    */
-  async cancelOrder(_actor, _orderId, _reason) {
-    throw new NotImplementedError('OrderService.cancelOrder');
+  async cancelOrder(actor, orderId, reason) {
+    const order = await this.#orderRepository.findByIdWithItems(orderId);
+
+    if (!order) {
+      throw new NotFoundError(`Order ${orderId} not found`);
+    }
+
+    this.assertOwnership(actor, order);
+
+    // BR-04 / AC-06: only Placed or Accepted orders may be cancelled.
+    if (!order.isCancellable) {
+      throw new ConflictError(
+        `Order ${orderId} cannot be cancelled from status "${order.status}"`,
+      );
+    }
+
+    const fromStatus = order.status;
+
+    // Validates the transition against the state graph and updates the in-memory model.
+    order.applyTransition('cancelled');
+
+    // Conditional write: fails (returns false) if another request already moved this
+    // order's status since we read it above — protects against the exact race NFR-11
+    // calls out.
+    const wasUpdated = await this.#orderRepository.updateStatusIf(
+      orderId,
+      fromStatus,
+      'cancelled',
+    );
+
+    if (!wasUpdated) {
+      throw new ConflictError(
+        `Order ${orderId} was modified concurrently; cancellation aborted`,
+      );
+    }
+
+    await this.#auditService.recordStatusChange(actor, 'order', orderId, fromStatus, 'cancelled');
+
+    // Fans out to student, vendor, and assigned rider per FR-E2/E3.
+    await this.#notificationService.notifyStatusChange(order, fromStatus, 'cancelled');
+
+    return order;
   }
 
   /**
@@ -242,16 +282,17 @@ export class OrderService extends BaseService {
     throw new NotImplementedError('OrderService.reorder');
   }
 
-  /**
+   /**
    * Object-level guard: students reach their own orders, vendors their shop's.
    *
    * @override
-   * @param {import('@/shared/types').Actor} _actor - Requesting principal.
-   * @param {import('@/server/models/order').Order} _order - Order being touched.
+   * @param {import('@/shared/types').Actor} actor - Requesting principal.
+   * @param {import('@/server/models/order').Order} order - Order being touched.
    * @returns {void} Returns nothing when allowed.
-   * @throws {NotImplementedError} Until implemented.
+   * @throws {ForbiddenError} When the actor is not the order's owner.
    */
-  assertOwnership(_actor, _order) {
-    throw new NotImplementedError('OrderService.assertOwnership');
+  assertOwnership(actor, order) {
+    if (!order.belongsTo(actor.id)) {
+      throw new ForbiddenError('You do not have permission to act on this order');
+    }
   }
-}
